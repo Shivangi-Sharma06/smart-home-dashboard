@@ -36,10 +36,11 @@ class MQTTBridge:
         self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
         self.client.on_connect = self._on_connect
         self.client.on_message = self._on_message
+        self.client.reconnect_delay_set(min_delay=1, max_delay=10)
 
     def start(self, host: str = "localhost", port: int = 1883) -> None:
         self.loop = asyncio.get_running_loop()
-        self.client.connect(host, port, keepalive=60)
+        self.client.connect_async(host, port, keepalive=60)
         self.client.loop_start()
 
     def stop(self) -> None:
