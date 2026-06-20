@@ -1,0 +1,135 @@
+:root {
+  color-scheme: dark;
+  --np-bg: #0d0f12;
+  --np-surface: #161a1f;
+  --np-surface-2: #1e242b;
+  --np-border: #2a323c;
+  --np-accent: #3b82f6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+  background: var(--np-bg);
+}
+
+body {
+  color: #eef4ff;
+}
+
+.appShell {
+  background: var(--np-bg);
+}
+
+.topNav {
+  background: rgba(13, 15, 18, 0.94);
+  border-bottom: 1px solid var(--np-border);
+  backdrop-filter: blur(10px);
+}
+
+.logoMark {
+  width: 18px;
+  height: 34px;
+  border-radius: 4px;
+  background: var(--np-accent);
+  box-shadow: 0 0 24px rgba(59, 130, 246, 0.55);
+}
+
+.filterWrap {
+  width: min(100%, 520px);
+}
+
+.roomFilter {
+  background: var(--np-surface);
+  border: 1px solid var(--np-border);
+}
+
+.sensorCard {
+  min-height: 190px;
+  background: var(--np-surface);
+  border: 1px solid var(--np-border);
+}
+
+.sensorCard:hover {
+  border-color: rgba(59, 130, 246, 0.7);
+}
+
+.sensorValue {
+  color: #eef4ff;
+  font-size: 44px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.sensorValue span {
+  margin-left: 6px;
+  color: #8d99a8;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.hotValue {
+  color: #ff6b6b;
+}
+
+.motionDot {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  border-radius: 50%;
+  background: #68717d;
+}
+
+.motionDotActive {
+  background: #51cf66;
+  animation: pulse 1.2s ease-in-out infinite;
+  box-shadow: 0 0 0 rgba(81, 207, 102, 0.55);
+}
+
+.motionLabel {
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.alertBanner {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  left: 24px;
+  z-index: 20;
+  border: 1px solid rgba(255, 107, 107, 0.45);
+  background: #32191d;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(81, 207, 102, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(81, 207, 102, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(81, 207, 102, 0);
+  }
+}
+
+@media (max-width: 640px) {
+  .filterWrap {
+    width: 100%;
+  }
+
+  .sensorValue {
+    font-size: 38px;
+  }
+
+  .motionLabel {
+    font-size: 30px;
+  }
+}
