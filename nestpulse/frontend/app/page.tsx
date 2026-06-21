@@ -45,6 +45,7 @@ function isNestPulseState(value: unknown): value is NestPulseState {
 }
 
 export default function Home() {
+  const [mounted, setMounted] = useState(false);
   const socketRef = useRef<WebSocket | null>(null);
   const reconnectTimerRef = useRef<number | null>(null);
   const [connected, setConnected] = useState(false);
@@ -52,6 +53,14 @@ export default function Home() {
   const [filter, setFilter] = useState<RoomFilterValue>('all');
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) {
+      return undefined;
+    }
+
     let shouldReconnect = true;
 
     const connect = () => {
@@ -89,7 +98,7 @@ export default function Home() {
       socketRef.current?.close();
       socketRef.current = null;
     };
-  }, []);
+  }, [mounted]);
 
   const visibleRooms = useMemo(() => {
     const entries = Object.entries(state.rooms);
@@ -100,6 +109,10 @@ export default function Home() {
   }, [filter, state.rooms]);
 
   const latestAlert = state.alerts.at(-1);
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <AppShell header={{ height: 72 }} padding="md" className="appShell">

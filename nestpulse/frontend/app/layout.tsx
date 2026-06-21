@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <ColorSchemeScript defaultColorScheme="dark" />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <MantineProvider defaultColorScheme="dark" theme={theme}>
           {children}
         </MantineProvider>
