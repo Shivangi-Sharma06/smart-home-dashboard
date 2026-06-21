@@ -26,26 +26,67 @@ const initialState: NestPulseState = {
   alerts: [],
 };
 
+function websocketUrl() {
+  if (process.env.NEXT_PUBLIC_WS_URL) {
+    return process.env.NEXT_PUBLIC_WS_URL;
+  }
+
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${protocol}//${window.location.hostname}:8000/ws`;
+}
+
+function isNestPulseState(value: unknown): value is NestPulseState {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const candidate = value as Partial<NestPulseState>;
+  return Boolean(candidate.rooms && typeof candidate.rooms === 'object' && Array.isArray(candidate.alerts));
+}
+
 export default function Home() {
   const socketRef = useRef<WebSocket | null>(null);
+  const reconnectTimerRef = useRef<number | null>(null);
   const [connected, setConnected] = useState(false);
   const [state, setState] = useState<NestPulseState>(initialState);
   const [filter, setFilter] = useState<RoomFilterValue>('all');
 
   useEffect(() => {
-    const socket = new WebSocket('ws://localhost:8000/ws');
-    socketRef.current = socket;
+    let shouldReconnect = true;
 
-    socket.onopen = () => setConnected(true);
-    socket.onclose = () => setConnected(false);
-    socket.onerror = () => setConnected(false);
-    socket.onmessage = (event) => {
-      const nextState = JSON.parse(event.data) as NestPulseState;
-      setState(nextState);
+    const connect = () => {
+      const socket = new WebSocket(websocketUrl());
+      socketRef.current = socket;
+
+      socket.onopen = () => setConnected(true);
+      socket.onclose = () => {
+        setConnected(false);
+        socketRef.current = null;
+        if (shouldReconnect) {
+          reconnectTimerRef.current = window.setTimeout(connect, 1500);
+        }
+      };
+      socket.onerror = () => setConnected(false);
+      socket.onmessage = (event) => {
+        try {
+          const nextState: unknown = JSON.parse(event.data);
+          if (isNestPulseState(nextState)) {
+            setState(nextState);
+          }
+        } catch {
+          setConnected(false);
+        }
+      };
     };
 
+    connect();
+
     return () => {
-      socket.close();
+      shouldReconnect = false;
+      if (reconnectTimerRef.current !== null) {
+        window.clearTimeout(reconnectTimerRef.current);
+      }
+      socketRef.current?.close();
       socketRef.current = null;
     };
   }, []);
