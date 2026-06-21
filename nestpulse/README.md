@@ -26,19 +26,26 @@ python -m venv .venv
 .venv/bin/uvicorn --app-dir backend main:app --reload
 ```
 
-3. Start the simulator from the `nestpulse` directory:
+3. Start the simulator from the `nestpulse` directory. For demos, the default path posts directly to FastAPI and then the dashboard updates through WebSockets, so it does not require a local MQTT broker:
 
 ```bash
 python simulator/sensor_sim.py
 ```
 
-For a clear step-by-step MQTT/WebSocket demo, run this instead of the random simulator:
+For a clear step-by-step WebSocket demo, run this instead of the random simulator:
 
 ```bash
 python simulator/event_trigger.py --room kitchen
 ```
 
 It publishes normal readings, motion on/off events, a high-temperature alert, and then a safe temperature so you can see the dashboard update through the backend WebSocket.
+
+To exercise the full MQTT broker path, keep Mosquitto running and use:
+
+```bash
+python simulator/event_trigger.py --transport mqtt --room kitchen
+python simulator/sensor_sim.py --mqtt
+```
 
 4. Start the frontend:
 
@@ -77,8 +84,9 @@ python -m venv .venv
 
 ## Data Flow
 
-- `simulator/sensor_sim.py` publishes fake room readings every 2 seconds to `home/{room}/{sensor}`.
-- `simulator/event_trigger.py` publishes a readable sequence of test events that makes MQTT topic updates, backend alert logic, and WebSocket broadcasts easy to observe.
+- `simulator/sensor_sim.py` publishes fake room readings every 2 seconds, using FastAPI HTTP by default or MQTT with `--mqtt`.
+- `simulator/event_trigger.py` publishes a readable sequence of test events that makes backend alert logic and WebSocket broadcasts easy to observe. Use `--transport mqtt` to exercise MQTT topics.
 - `backend/mqtt_client.py` subscribes to `home/#`, updates an in-memory room state, computes high-temperature alerts, and broadcasts the full state.
+- `backend/main.py` also exposes `POST /events` for reliable demos without a broker.
 - `backend/main.py` serves `ws://localhost:8000/ws`; clients receive current state immediately on connect and every update after that.
 - `frontend/app/page.tsx` connects to the WebSocket and renders live room cards, connection status, room filters, and alert banner.

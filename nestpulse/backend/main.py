@@ -4,10 +4,18 @@ import json
 from contextlib import asynccontextmanager
 from typing import Any
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from pydantic import BaseModel, Field
+
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
-from mqtt_client import MQTTBridge, initial_state
+from mqtt_client import ROOMS, SENSORS, MQTTBridge, apply_sensor_event, initial_state
+
+
+class SensorEvent(BaseModel):
+    room: str = Field(examples=["kitchen"])
+    sensor: str = Field(examples=["temperature"])
+    payload: dict[str, Any] = Field(examples=[{"value": 38.2, "unit": "C"}])
 
 
 class ConnectionManager:
@@ -46,11 +54,16 @@ manager = ConnectionManager()
 async def lifespan(app: FastAPI):
     bridge = MQTTBridge(state, manager.broadcast)
     app.state.mqtt_bridge = bridge
-    bridge.start()
+    try:
+        bridge.start()
+    except OSError as exc:
+        app.state.mqtt_bridge = None
+        print(f"MQTT bridge disabled: {exc}")
     try:
         yield
     finally:
-        bridge.stop()
+        if app.state.mqtt_bridge is not None:
+            bridge.stop()
 
 
 app = FastAPI(title="NestPulse API", lifespan=lifespan)
@@ -67,6 +80,27 @@ app.add_middleware(
 @app.get("/health")
 async def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/state")
+async def current_state() -> dict[str, Any]:
+    return state
+
+
+@app.post("/events")
+async def ingest_event(event: SensorEvent) -> dict[str, Any]:
+    if event.room not in ROOMS:
+        raise HTTPException(status_code=400, detail=f"Unknown room: {event.room}")
+    if event.sensor not in SENSORS:
+        raise HTTPException(status_code=400, detail=f"Unknown sensor: {event.sensor}")
+
+    try:
+        apply_sensor_event(state, event.room, event.sensor, event.payload)
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(status_code=400, detail=f"Invalid payload: {exc}") from exc
+
+    await manager.broadcast(state)
+    return state
 
 
 @app.websocket("/ws")

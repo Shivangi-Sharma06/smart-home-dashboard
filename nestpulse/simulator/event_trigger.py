@@ -3,11 +3,14 @@ import json
 import time
 from collections.abc import Iterable
 from dataclasses import dataclass
+from urllib.error import URLError
+from urllib.request import Request, urlopen
 
 import paho.mqtt.client as mqtt
 
 BROKER_HOST = "localhost"
 BROKER_PORT = 1883
+API_URL = "http://localhost:8000/events"
 ROOMS = ("living-room", "bedroom", "kitchen")
 
 
@@ -19,12 +22,26 @@ class Event:
     note: str
 
 
-def publish(client: mqtt.Client, event: Event) -> None:
+def publish_mqtt(client: mqtt.Client, event: Event) -> None:
     topic = f"home/{event.room}/{event.sensor}"
     message = json.dumps(event.payload)
     result = client.publish(topic, message)
     result.wait_for_publish()
     print(f"MQTT publish -> {topic} {message}  # {event.note}")
+
+
+def publish_http(api_url: str, event: Event) -> None:
+    message = json.dumps(
+        {
+            "room": event.room,
+            "sensor": event.sensor,
+            "payload": event.payload,
+        }
+    ).encode("utf-8")
+    request = Request(api_url, data=message, headers={"Content-Type": "application/json"}, method="POST")
+    with urlopen(request, timeout=5) as response:
+        response.read()
+    print(f"HTTP publish -> {event.room}/{event.sensor} {event.payload}  # {event.note}")
 
 
 def demo_events(room: str) -> Iterable[Event]:
@@ -66,22 +83,39 @@ def main() -> None:
         default="demo",
         help="demo sends a timed story; snapshot sends one reading for every room.",
     )
+    parser.add_argument(
+        "--transport",
+        choices=("mqtt", "http"),
+        default="http",
+        help="http posts directly to FastAPI for reliable demos; mqtt exercises the broker path.",
+    )
+    parser.add_argument("--api-url", default=API_URL, help="FastAPI event endpoint for --transport http.")
+    parser.add_argument("--broker-host", default=BROKER_HOST, help="MQTT broker host for --transport mqtt.")
+    parser.add_argument("--broker-port", type=int, default=BROKER_PORT, help="MQTT broker port for --transport mqtt.")
     parser.add_argument("--delay", type=float, default=1.5, help="Seconds between MQTT events.")
     args = parser.parse_args()
 
-    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
-    client.connect(BROKER_HOST, BROKER_PORT, keepalive=60)
-    client.loop_start()
-
     events = demo_events(args.room) if args.scenario == "demo" else all_rooms_snapshot()
     print("Publishing NestPulse trigger events. Watch the dashboard and backend WebSocket update.")
-    try:
-        for event in events:
-            publish(client, event)
-            time.sleep(args.delay)
-    finally:
-        client.loop_stop()
-        client.disconnect()
+    if args.transport == "mqtt":
+        client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+        client.connect(args.broker_host, args.broker_port, keepalive=60)
+        client.loop_start()
+        try:
+            for event in events:
+                publish_mqtt(client, event)
+                time.sleep(args.delay)
+        finally:
+            client.loop_stop()
+            client.disconnect()
+            print("Trigger sequence complete.")
+    else:
+        try:
+            for event in events:
+                publish_http(args.api_url, event)
+                time.sleep(args.delay)
+        except URLError as exc:
+            raise SystemExit(f"Could not reach backend at {args.api_url}: {exc}") from exc
         print("Trigger sequence complete.")
 
 
