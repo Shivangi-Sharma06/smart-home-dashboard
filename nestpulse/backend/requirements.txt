@@ -1,4 +1,5 @@
 fastapi
-uvicorn
+uvicorn[standard]
 paho-mqtt
 websockets
+pydantic
