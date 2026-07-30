@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "session": {
+    "sessionId": "2c92d87a-f18b-490f-b222-7645b5b6d58c",
+    "projectId": "smart-home-dashboard-19",
+    "streamId": "19",
+    "workerAddress": "GDSIVNLG4VHVJRM27IP5VNEACEXWSZPRS4JTGMLA7OHJQSKUXE24BCJR",
+    "startedAt": "2026-07-20T21:04:05.908Z",
+    "endedAt": "2026-07-20T21:04:50.777Z",
+    "totalSeconds": 44,
+    "activeSeconds": 44,
+    "idleSeconds": 0,
+    "packageVersion": "0.2.0",
+    "projectEnded": false
+  },
+  "repository": {
+    "repositoryId": "smart-home-dashboard-7eb10a73f07a",
+    "branchAtStart": "main",
+    "branchAtEnd": "main",
+    "startingCommit": "9bd3dcbcb8196ebaf40bff108aed1eb88ade8a25",
+    "endingCommit": "9bd3dcbcb8196ebaf40bff108aed1eb88ade8a25",
+    "dirtyAtStart": true,
+    "dirtyAtEnd": true
+  },
+  "changes": {
+    "changedFiles": [
+      {
+        "path": ".aven/config.json",
+        "language": "JSON",
+        "changeType": "created",
+        "additions": 0,
+        "deletions": 0,
+        "category": "configuration",
+        "includedInVerification": false,
+        "excludedReason": "Excluded by Git/Aven privacy rules."
+      },
+      {
+        "path": ".aven/session.json",
+        "language": "JSON",
+        "changeType": "created",
+        "additions": 0,
+        "deletions": 0,
+        "category": "configuration",
+        "includedInVerification": false,
+        "excludedReason": "Excluded by Git/Aven privacy rules."
+      },
+      {
+        "path": ".avenignore",
+        "changeType": "created",
+        "additions": 0,
+        "deletions": 0,
+        "category": "configuration",
+        "includedInVerification": false,
+        "excludedReason": "Excluded by Git/Aven privacy rules."
+      },
+      {
+        "path": "testing /demo.txt",
+        "changeType": "created",
+        "additions": 0,
+        "deletions": 0,
+        "category": "documentation",
+        "includedInVerification": true
+      }
+    ],
+    "additions": 0,
+    "deletions": 0,
+    "commits": [],
+    "testsChanged": 0,
+    "documentationFilesChanged": 1,
+    "generatedFilesExcluded": 0
+  },
+  "workerStatement": {
+    "message": "i pushed a new folder",
+    "providedAt": "2026-07-20T21:04:50.777Z"
+  },
+  "localVerification": {
+    "verifierVersion": "0.1.0",
+    "workType": "mixed",
+    "flags": [
+      "NO_SUBSTANTIVE_CODE_CHANGES"
+    ],
+    "summary": "Local review found 1 signal(s): NO_SUBSTANTIVE_CODE_CHANGES."
+  },
+  "paymentRequest": {
+    "requestedAmount": "0.0038192",
+    "asset": "XLM",
+    "calculation": "active_time_x_stream_rate",
+    "ratePerSecond": "0.0000868",
+    "billableSeconds": 44
+  },
+  "privacy": {
+    "profile": "standard",
+    "excludedFileCount": 3,
+    "secretWarnings": 0,
+    "fullFilesIncluded": false
+  }
+}

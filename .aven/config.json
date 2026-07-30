@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "dashboardUrl": "https://hey-aven.vercel.app",
+  "projectId": "smart-home-dashboard-19",
+  "contractId": "CAZSE5UHSWNF62K26OZKOL7BSFB2647CXRPOICHUDCUJ5EKS4NCOA6ZA",
+  "streamId": "19",
+  "workerAddress": "GDSIVNLG4VHVJRM27IP5VNEACEXWSZPRS4JTGMLA7OHJQSKUXE24BCJR",
+  "asset": "XLM",
+  "token": "524b10efed0ad8ebaef28dcc823c31ee138c760bc67a6f560bc2307333dde9d7",
+  "ratePerSecond": "0.0000868"
+}
